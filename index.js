@@ -3,6 +3,7 @@ const app = express();
 const port = 3000;
 const cors = require("cors"); // Importer le middleware CORS
 const bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,11 +33,15 @@ app.post("/connexion", (req, res) => {
     [utilisateur.email, utilisateur.password],
     function (err, rows, fields) {
       if (err) throw err;
-      console.log(rows.length);
+      if (rows.length == 1) {
+        const token = jwt.sign({ sub: utilisateur.email }, "azerty");
+        console.log(token);
+        res.send({ jwt: token });
+      } else {
+        res.status(403).send({ error: "Identifiants inconnus" });
+      }
     }
   );
-
-  res.json({ jwt: "le futur jwt" });
 });
 
 app.get("/categories", (req, res) => {
