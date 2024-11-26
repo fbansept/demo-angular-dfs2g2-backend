@@ -35,7 +35,6 @@ app.post("/connexion", (req, res) => {
       if (err) throw err;
       if (rows.length == 1) {
         const token = jwt.sign({ sub: utilisateur.email }, "azerty");
-        console.log(token);
         res.send({ jwt: token });
       } else {
         res.status(403).send({ error: "Identifiants inconnus" });
@@ -45,14 +44,31 @@ app.post("/connexion", (req, res) => {
 });
 
 app.get("/categories", (req, res) => {
-  const categoriesParDefaut = [
-    { titre: "S", images: [] },
-    { titre: "A", images: [] },
-    { titre: "B", images: [] },
-    { titre: "C", images: [] }
-  ];
+  const token = req.headers["authorization"];
 
-  res.json(categoriesParDefaut);
+  jwt.verify(token, "azerty", (erreur, donnees) => {
+    if (erreur) return res.sendStatus(403);
+
+    const email = donnees.sub;
+
+    connection.query(
+      "SELECT c.id, c.titre FROM categorie c JOIN utilisateur u ON u.id = c.id_utilisateur WHERE u.email = ?",
+      [email],
+      function (err, rows, fields) {
+        if (err) throw err;
+        console.log(rows);
+      }
+    );
+  });
+
+  // const categoriesParDefaut = [
+  //   { titre: "S", images: [] },
+  //   { titre: "A", images: [] },
+  //   { titre: "B", images: [] },
+  //   { titre: "C", images: [] }
+  // ];
+
+  // res.json(categoriesParDefaut);
 });
 
 // Démarrer le serveur
