@@ -14,25 +14,27 @@ const mysql = require("mysql2");
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root",
+  database: "dfs_g2_24_25",
   password: ""
 });
 
 connection.connect();
-
-connection.query("SELECT 1 + 1 AS solution", function (err, rows, fields) {
-  if (err) throw err;
-  console.log("The solution is: ", rows[0].solution);
-});
-
-connection.end();
 
 app.get("/", (req, res) => {
   res.send("Le serveur marche, mais il y a rien à voir ici");
 });
 
 app.post("/connexion", (req, res) => {
-  const jsonUtilisateur = req.body;
-  console.log(jsonUtilisateur);
+  const utilisateur = req.body;
+
+  connection.query(
+    "SELECT * FROM utilisateur WHERE email = ? AND password = ?",
+    [utilisateur.email, utilisateur.password],
+    function (err, rows, fields) {
+      if (err) throw err;
+      console.log(rows.length);
+    }
+  );
 
   res.json({ jwt: "le futur jwt" });
 });
